@@ -5,13 +5,18 @@ import jestPlugin from "eslint-plugin-jest";
 export default [
   // 1. Configuração de arquivos a ignorar (Substitui o globalIgnores)
   {
-    ignores: [".next/*", "node_modules/*"],
+    ignores: [".next/*", "node_modules/*", "infra/migrations/*"],
   },
 
   // 2. Configuração base para JS e Browser
   {
     files: ["**/*.{js,mjs,cjs,jsx}"],
     languageOptions: {
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true, // Isso habilita o suporte ao JSX
+        },
+      },
       globals: {
         ...globals.browser,
         ...globals.node, // Essencial para Next.js (SSR)
