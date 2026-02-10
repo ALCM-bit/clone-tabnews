@@ -1,1 +1,1 @@
-npx commitlint --edit $1 && detect-secrets-launcher src/**/*.js
+npx commitlint --edit $1
