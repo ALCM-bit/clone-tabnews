@@ -26,7 +26,7 @@ async function getHandler(request, response) {
     "no-store, no-cache, max-age=0, must-revalidate",
   );
 
-  const secureOutputValues = await authorization.filterOutput(
+  const secureOutputValues = authorization.filterOutput(
     userTryingToGet,
     "read:user:self",
     userFound,

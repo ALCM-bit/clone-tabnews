@@ -17,7 +17,7 @@ async function getHandler(request, response) {
   const username = request.query.username;
   const userFound = await user.findOneByUsername(username);
 
-  const secureOutputValues = await authorization.filterOutput(
+  const secureOutputValues = authorization.filterOutput(
     userTryingToGet,
     "read:user",
     userFound,
@@ -43,7 +43,7 @@ async function patchHandler(request, response) {
 
   const updatedUser = await user.update(username, userInputValues);
 
-  const secureOutputValues = await authorization.filterOutput(
+  const secureOutputValues = authorization.filterOutput(
     userTryingToPatch,
     "read:user",
     updatedUser,

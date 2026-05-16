@@ -43,7 +43,7 @@ async function getHandler(request, response) {
     },
   };
 
-  const secureOutputValues = await authorization.filterOutput(
+  const secureOutputValues = authorization.filterOutput(
     userTryingToGet,
     "read:status",
     statusObject,

@@ -16,7 +16,7 @@ async function getHandler(request, response) {
 
   const pendingMigrations = await migrator.listPendingMigrations();
 
-  const secureOutputValues = await authorization.filterOutput(
+  const secureOutputValues = authorization.filterOutput(
     userTryingToGet,
     "read:migration",
     pendingMigrations,
@@ -28,7 +28,7 @@ async function postHandler(request, response) {
   const userTryingToPost = request.context.user;
   const migratedMigrations = await migrator.runPendingMigrations();
 
-  const secureOutputValues = await authorization.filterOutput(
+  const secureOutputValues = authorization.filterOutput(
     userTryingToPost,
     "read:migration",
     migratedMigrations,
