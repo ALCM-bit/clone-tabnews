@@ -33,7 +33,7 @@ function onErrorHangler(error, request, response) {
   const publicErrorObject = new InternalServerError({
     cause: error,
   });
-
+  console.error(publicErrorObject);
   response.status(publicErrorObject.statusCode).json(publicErrorObject);
 }
 
