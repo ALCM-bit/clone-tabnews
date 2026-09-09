@@ -14,13 +14,12 @@ async function findOneValidById(tokenId) {
   async function runSelectQuery(tokenId) {
     const results = await database.query({
       text: `
-        SELECT 
+        SELECT
           *
         FROM
           user_activation_token
         WHERE
           id = $1
-          AND used_at IS NULL
           AND expires_at > NOW()
         LIMIT
           1
@@ -48,11 +47,11 @@ async function create(userId) {
   async function runInsertQuery(userId, expiresAt) {
     const results = await database.query({
       text: `
-        INSERT INTO 
+        INSERT INTO
           user_activation_token (user_id, expires_at)
         VALUES
           ($1, $2)
-        RETURNING 
+        RETURNING
           *
       ;`,
       values: [userId, expiresAt],
@@ -111,10 +110,26 @@ async function sendEmailToUser(user, activationToken) {
     subject: "Ative seu cadastro no ByteTab!",
     text: `${user.username}, clique no link abaixo para ativar seu cadastro no FinTab
 ${webserver.origin}/cadastro/ativar/${activationToken.id}
-    
+
 Atenciosamente,
 Equipe FinTab`,
   });
+}
+
+async function activateUserByToken(tokenId) {
+  const validActivationToken = await activation.findOneValidById(tokenId);
+
+  if (validActivationToken.used_at) {
+    return validActivationToken;
+  }
+
+  const userToActivate = await user.findOneById(validActivationToken.user_id);
+
+  if (authorization.can(userToActivate, "read:activation_token")) {
+    await activation.activateUserByUserId(validActivationToken.user_id);
+  }
+
+  return await activation.markTokenAsUsed(tokenId);
 }
 
 const activation = {
@@ -124,6 +139,7 @@ const activation = {
   markTokenAsUsed,
   activateUserByUserId,
   EXPIRATION_IN_MILISECONDS,
+  activateUserByToken,
 };
 
 export default activation;

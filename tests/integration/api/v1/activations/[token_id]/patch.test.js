@@ -84,17 +84,40 @@ describe("PATCH /api/v1/activations/[token_id]", () => {
         },
       );
 
-      expect(response2.status).toBe(404);
+      expect(response2.status).toBe(200);
 
       const response2Body = await response2.json();
-
       expect(response2Body).toEqual({
-        name: "NotFoundError",
-        message:
-          "O token de ativação não foi encontrado no sistema ou expirou.",
-        action: "Faça um novo cadastro.",
-        status_code: 404,
+        id: activationToken.id,
+        user_id: activationToken.user_id,
+        used_at: response2Body.used_at,
+        expires_at: activationToken.expires_at.toISOString(),
+        created_at: activationToken.created_at.toISOString(),
+        updated_at: response2Body.updated_at,
       });
+
+      expect(uuidVersion(response2Body.id)).toBe(4);
+      expect(uuidVersion(response2Body.user_id)).toBe(4);
+
+      expect(Date.parse(response2Body.expires_at)).not.toBeNaN();
+      expect(Date.parse(response2Body.created_at)).not.toBeNaN();
+      expect(Date.parse(response2Body.updated_at)).not.toBeNaN();
+      expect(response2Body.updated_at > response2Body.created_at).toBe(true);
+
+      const expiresAt = new Date(response2Body.expires_at);
+      const createdAt = new Date(response2Body.created_at);
+
+      expiresAt.setMilliseconds(0);
+      createdAt.setMilliseconds(0);
+
+      expect(expiresAt - createdAt).toBe(activation.EXPIRATION_IN_MILISECONDS);
+
+      const activatedUser = await user.findOneById(response2Body.user_id);
+      expect(activatedUser.features).toEqual([
+        "create:session",
+        "read:session",
+        "update:user",
+      ]);
     });
 
     test("With valid token", async () => {
@@ -157,16 +180,41 @@ describe("PATCH /api/v1/activations/[token_id]", () => {
         },
       );
 
-      expect(response.status).toBe(403);
+      expect(response.status).toBe(200);
 
       const responseBody = await response.json();
 
       expect(responseBody).toEqual({
-        name: "ForbiddenError",
-        message: "Você não pode mais utilizar tokens de ativação.",
-        action: "Entre em contato com o suporte.",
-        status_code: 403,
+        id: activationToken.id,
+        user_id: activationToken.user_id,
+        used_at: responseBody.used_at,
+        expires_at: activationToken.expires_at.toISOString(),
+        created_at: activationToken.created_at.toISOString(),
+        updated_at: responseBody.updated_at,
       });
+
+      expect(uuidVersion(responseBody.id)).toBe(4);
+      expect(uuidVersion(responseBody.user_id)).toBe(4);
+
+      expect(Date.parse(responseBody.expires_at)).not.toBeNaN();
+      expect(Date.parse(responseBody.created_at)).not.toBeNaN();
+      expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
+      expect(responseBody.updated_at > responseBody.created_at).toBe(true);
+
+      const expiresAt = new Date(responseBody.expires_at);
+      const createdAt = new Date(responseBody.created_at);
+
+      expiresAt.setMilliseconds(0);
+      createdAt.setMilliseconds(0);
+
+      expect(expiresAt - createdAt).toBe(activation.EXPIRATION_IN_MILISECONDS);
+
+      const activatedUser = await user.findOneById(responseBody.user_id);
+      expect(activatedUser.features).toEqual([
+        "create:session",
+        "read:session",
+        "update:user",
+      ]);
     });
   });
 

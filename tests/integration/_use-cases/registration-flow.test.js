@@ -67,7 +67,6 @@ describe("Use case: Registration Flow (all successful)", () => {
         method: "PATCH",
       },
     );
-
     expect(activationResponse.status).toBe(200);
     const activationResponseBody = await activationResponse.json();
 
